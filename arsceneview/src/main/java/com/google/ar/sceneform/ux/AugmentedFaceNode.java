@@ -42,6 +42,7 @@ import com.google.ar.sceneform.rendering.Texture;
 import com.google.ar.sceneform.rendering.Vertex;
 import com.google.ar.sceneform.rendering.Vertex.UvCoordinate;
 import io.github.sceneview.SceneView;
+import io.github.sceneview.ar.arcore.PoseKt;
 import io.github.sceneview.ar.node.ArNode;
 import io.github.sceneview.node.ModelNode;
 
@@ -279,8 +280,8 @@ public class AugmentedFaceNode extends ArNode {
     private void updateTransform() {
         // Update this node to be positioned at the center pose of the face.
         Pose centerPose = checkNotNull(augmentedFace).getCenterPose();
-        setWorldPosition(new Vector3(centerPose.tx(), centerPose.ty(), centerPose.tz()), false);
-        setWorldRotation(new Quaternion(centerPose.qx(), centerPose.qy(), centerPose.qz(), centerPose.qw()), false);
+        setWorldPosition(PoseKt.getPosition(centerPose), false);
+        setWorldRotation(PoseKt.getRotation(centerPose), false);
     }
 
     private void updateRegionNodes() {

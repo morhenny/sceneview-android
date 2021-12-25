@@ -4,6 +4,9 @@ import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.Light
 import com.google.ar.sceneform.rendering.LightInstance
+import io.github.sceneview.Position
+import io.github.sceneview.Rotation
+import io.github.sceneview.Scale
 
 /**
  * ### A Node represents a transformation within the scene graph's hierarchy.
@@ -14,11 +17,11 @@ import com.google.ar.sceneform.rendering.LightInstance
  * another node, or the scene.
  */
 class LightNode(
-    position: Vector3 = defaultPosition,
-    rotationQuaternion: Quaternion = defaultRotation,
-    scales: Vector3 = defaultScales,
+    position: Position = defaultPosition,
+    rotation: Rotation = defaultRotation,
+    scales: Scale = defaultScales,
     parent: NodeParent? = null
-) : Node(position, rotationQuaternion, scales, parent) {
+) : Node(position, rotation, scales, parent) {
 
     /**
      * ### The [Light] to display.
@@ -52,16 +55,16 @@ class LightNode(
     constructor(
         lightInstance: LightInstance? = null,
         parent: NodeParent? = null,
-        position: Vector3 = Vector3(),
-        rotationQuaternion: Quaternion = Quaternion(),
-        scales: Vector3 = Vector3(1.0f, 1.0f, 1.0f)
-    ) : this(position, rotationQuaternion, scales, parent) {
+        position: Position = Position(),
+        rotation: Rotation = Rotation(),
+        scales: Scale = Scale(1.0f, 1.0f, 1.0f)
+    ) : this(position, rotation, scales, parent) {
         this.lightInstance = lightInstance
     }
 
     constructor(node: LightNode) : this(
         position = node.position,
-        rotationQuaternion = node.rotationQuaternion,
+        rotation = node.rotation,
         scales = node.scales
     ) {
         setLight(node.light)

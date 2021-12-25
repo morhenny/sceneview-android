@@ -7,6 +7,9 @@ import com.google.ar.core.HitResult
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.RenderableInstance
+import io.github.sceneview.Position
+import io.github.sceneview.Rotation
+import io.github.sceneview.Scale
 import io.github.sceneview.SceneView
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.arcore.ArFrame
@@ -45,13 +48,13 @@ import io.github.sceneview.node.NodeParent
  * [InstantPlacementPoint][com.google.ar.core.InstantPlacementPoint].
  */
 open class InstantPlacementNode(
-    position: Vector3 = defaultPosition,
-    rotationQuaternion: Quaternion = defaultRotation,
-    scales: Vector3 = defaultScales,
+    position: Position = defaultPosition,
+    rotation: Rotation = defaultRotation,
+    scales: Scale = defaultScales,
     parent: NodeParent? = null
 ) : ArNode(
     position = position,
-    rotationQuaternion = rotationQuaternion,
+    rotation = rotation,
     scales = scales,
     parent = parent
 ) {
@@ -82,10 +85,10 @@ open class InstantPlacementNode(
         onModelLoaded: ((instance: RenderableInstance) -> Unit)? = null,
         onError: ((error: Exception) -> Unit)? = null,
         parent: NodeParent? = null,
-        position: Vector3 = defaultPosition,
-        rotationQuaternion: Quaternion = defaultRotation,
-        scales: Vector3 = defaultScales,
-    ) : this(position, rotationQuaternion, scales, parent) {
+        position: Position = defaultPosition,
+        rotation: Rotation = defaultRotation,
+        scales: Scale = defaultScales,
+    ) : this(position, rotation, scales, parent) {
         loadModel(context, modelGlbFileLocation, coroutineScope, onModelLoaded, onError)
     }
 

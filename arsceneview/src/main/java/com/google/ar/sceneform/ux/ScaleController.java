@@ -81,8 +81,8 @@ public class ScaleController extends BaseTransformationController<PinchGesture> 
   @Override
   public void onActivated(Node node) {
     super.onActivated(node);
-    Vector3 scale = getTransformableNode().getScales();
-    currentScaleRatio = (scale.x - minScale) / getScaleDelta();
+//    Vector3 scale = getTransformableNode().getScales();
+//    currentScaleRatio = (scale.x - minScale) / getScaleDelta();
   }
 
   @Override
@@ -95,7 +95,7 @@ public class ScaleController extends BaseTransformationController<PinchGesture> 
     currentScaleRatio = MathHelper.lerp(currentScaleRatio, getClampedScaleRatio(), t);
     float finalScaleValue = getFinalScale();
     Vector3 finalScale = new Vector3(finalScaleValue, finalScaleValue, finalScaleValue);
-    getTransformableNode().setScales(finalScale);
+//    getTransformableNode().setScales(finalScale);
   }
 
   @Override
@@ -109,7 +109,7 @@ public class ScaleController extends BaseTransformationController<PinchGesture> 
 
     float finalScaleValue = getFinalScale();
     Vector3 finalScale = new Vector3(finalScaleValue, finalScaleValue, finalScaleValue);
-    getTransformableNode().setScales(finalScale);
+//    getTransformableNode().setScales(finalScale);
 
     if (currentScaleRatio < -ELASTIC_RATIO_LIMIT
         || currentScaleRatio > (1.0f + ELASTIC_RATIO_LIMIT)) {

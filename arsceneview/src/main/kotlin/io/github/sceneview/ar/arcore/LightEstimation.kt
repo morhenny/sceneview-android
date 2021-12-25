@@ -36,7 +36,7 @@ import java.nio.ByteOrder
  * positioned specular highlights, and to cast shadows in a direction consistent with other
  * visible real objects.
  */
-data class LightEstimationConfig @JvmOverloads constructor(
+data class LightEstimation @JvmOverloads constructor(
     /**
      * ### The behavior of the lighting estimation subsystem.
      *
@@ -108,8 +108,7 @@ data class LightEstimationConfig @JvmOverloads constructor(
          *
          * The reflected environment will the one given by ARCore
          */
-        @JvmField
-        val REALISTIC = LightEstimationConfig(
+        val REALISTIC get() = LightEstimation(
             mode = Config.LightEstimationMode.ENVIRONMENTAL_HDR,
             environmentalHdrSpecularFilter = true
         )
@@ -124,8 +123,7 @@ data class LightEstimationConfig @JvmOverloads constructor(
          *
          * The reflected environment will the one given by ARCore
          */
-        @JvmField
-        val SPECTACULAR = LightEstimationConfig(
+        val SPECTACULAR get() = LightEstimation(
             mode = Config.LightEstimationMode.ENVIRONMENTAL_HDR,
             environmentalHdrSpecularFilter = false
         )
@@ -136,9 +134,8 @@ data class LightEstimationConfig @JvmOverloads constructor(
          * The reflected environment will the default one or the one defined by
          * [SceneView.environment]
          */
-        @JvmField
-        val AMBIENT_INTENSITY =
-            LightEstimationConfig(mode = Config.LightEstimationMode.AMBIENT_INTENSITY)
+        val AMBIENT_INTENSITY get() =
+            LightEstimation(mode = Config.LightEstimationMode.AMBIENT_INTENSITY)
 
 
         /**
@@ -147,9 +144,8 @@ data class LightEstimationConfig @JvmOverloads constructor(
          * The reflected environment will the default one or the one defined by
          * [SceneView.environment]
          */
-        @JvmField
-        val DISABLED =
-            LightEstimationConfig(mode = Config.LightEstimationMode.DISABLED)
+        val DISABLED get() =
+            LightEstimation(mode = Config.LightEstimationMode.DISABLED)
     }
 }
 
@@ -238,7 +234,7 @@ class EnvironmentLightsEstimate(
  * Infos: https://github.com/ThomasGorisse/SceneformMaintained/pull/156#issuecomment-911873565
  */
 fun ArFrame.environmentLightsEstimate(
-    config: LightEstimationConfig,
+    config: LightEstimation,
     previousEstimate: EnvironmentLightsEstimate?,
     baseEnvironment: Environment?,
     baseLight: Light?,

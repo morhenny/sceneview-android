@@ -9,8 +9,8 @@ import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.google.ar.core.TrackingFailureReason
-import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.RenderableInstance
+import io.github.sceneview.Position
 import io.github.sceneview.SceneView
 import io.github.sceneview.ar.ArSceneView
 import io.github.sceneview.ar.R
@@ -22,7 +22,7 @@ open class SearchPlaneInfoNode(context: Context, coroutineScope: LifecycleCorout
         context = context,
         coroutineScope = coroutineScope,
         viewLayoutResId = R.layout.sceneview_view_info_search_plane,
-        position = Vector3(0.0f, 0.0f, -2.0f)
+        position = Position(0.0f, 0.0f, -2.0f)
     ) {
 
     var textView: TextView? = null

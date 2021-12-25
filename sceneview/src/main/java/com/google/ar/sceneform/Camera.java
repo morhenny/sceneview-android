@@ -4,6 +4,8 @@ import android.view.MotionEvent;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.google.android.filament.utils.Float3;
+import com.google.android.filament.utils.Mat4;
 import com.google.ar.sceneform.collision.Ray;
 import com.google.ar.sceneform.math.MathHelper;
 import com.google.ar.sceneform.math.Matrix;
@@ -28,11 +30,11 @@ import io.github.sceneview.node.NodeParent;
  *   <li>{@link #setParent(NodeParent)} - Camera's parent cannot be changed, it is always the scene.
  *   <li>{@link #setPosition(Vector3)} - Camera's position cannot be changed, it is controlled
  *       by the ARCore camera pose.
- *   <li>{@link #setRotationQuaternion(Quaternion)} - Camera's rotation cannot be changed, it is
+ *   <li>{@link #setOrientation(Quaternion)} - Camera's rotation cannot be changed, it is
  *       controlled by the ARCore camera pose.
  *   <li>{@link #setPosition(Vector3)} - Camera's position cannot be changed, it is controlled
  *       by the ARCore camera pose.
- *   <li>{@link #setRotationQuaternion(Quaternion)} - Camera's rotation cannot be changed, it is
+ *   <li>{@link #setOrientation(Quaternion)} - Camera's rotation cannot be changed, it is
  *       controlled by the ARCore camera pose.
  * </ul>
  * <p>
@@ -245,27 +247,27 @@ public class Camera extends Node implements CameraProvider {
 
     /**
      * Set the position of the camera. The camera is always top level, therefore this behaves
-     * the same as {@link #setPosition(Vector3)}.
+     * the same as {@link #setPosition(Float3)}.
      *
-     * <p>If the camera is part of an {@link SceneView}, then this is an unsupported operation.
+     * <p>If the camera is part of an ArSceneView, then this is an unsupported operation.
      * Camera's position cannot be changed, it is controlled by the ARCore camera pose.
      */
     @Override
-    public void setPosition(Vector3 position) {
+    public void setPosition(Float3 position) {
         super.setPosition(position);
         Matrix.invert(getTransformationMatrix(), viewMatrix);
     }
 
     /**
      * Set the rotation of the camera. The camera is always top level, therefore this behaves
-     * the same as {@link #setRotationQuaternion(Quaternion)}.
+     * the same as {@link #setRotation(Float3)}.
      *
-     * <p>If the camera is part of an {@link SceneView}, then this is an unsupported operation.
+     * <p>If the camera is part of an ArSceneView, then this is an unsupported operation.
      * Camera's rotation cannot be changed, it is controlled by the ARCore camera pose.
      */
     @Override
-    public void setRotationQuaternion(Quaternion rotation) {
-        super.setRotationQuaternion(rotation);
+    public void setRotation(Float3 rotation) {
+        super.setRotation(rotation);
         Matrix.invert(getTransformationMatrix(), viewMatrix);
     }
 

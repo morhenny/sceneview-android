@@ -1,5 +1,6 @@
 package com.google.ar.sceneform;
 
+import com.google.android.filament.utils.Float3;
 import com.google.ar.core.Pose;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
@@ -7,6 +8,7 @@ import com.google.ar.sceneform.utilities.Preconditions;
 import io.github.sceneview.ar.ArSceneView;
 
 import io.github.sceneview.SceneView;
+import io.github.sceneview.ar.arcore.PoseKt;
 import io.github.sceneview.node.NodeParent;
 
 /**
@@ -20,11 +22,11 @@ import io.github.sceneview.node.NodeParent;
  *   <li>{@link #setParent(NodeParent)} - Camera's parent cannot be changed, it is always the scene.
  *   <li>{@link #setPosition(Vector3)} - Camera's position cannot be changed, it is controlled
  *       by the ARCore camera pose.
- *   <li>{@link #setRotationQuaternion(Quaternion)} - Camera's rotation cannot be changed, it is
+ *   <li>{@link #setOrientation(Quaternion)} - Camera's rotation cannot be changed, it is
  *       controlled by the ARCore camera pose.
  *   <li>{@link #setPosition(Vector3)} - Camera's position cannot be changed, it is controlled
  *       by the ARCore camera pose.
- *   <li>{@link #setRotationQuaternion(Quaternion)} - Camera's rotation cannot be changed, it is
+ *   <li>{@link #setOrientation(Quaternion)} - Camera's rotation cannot be changed, it is
  *       controlled by the ARCore camera pose.
  * </ul>
  * <p>
@@ -92,20 +94,20 @@ public class ArCamera extends Camera {
 
         // Update the node's transformation properties to match the tracked pose.
         Pose pose = camera.getDisplayOrientedPose();
-        Vector3 position = ArHelpers.extractPositionFromPose(pose);
-        Quaternion rotation = ArHelpers.extractRotationFromPose(pose);
-        super.setPosition(position);
-        super.setRotationQuaternion(rotation);
+//        Vector3 position = ArHelpers.extractPositionFromPose(pose);
+//        Quaternion rotation = ArHelpers.extractRotationFromPose(pose);
+        super.setPosition(PoseKt.getPosition(pose));
+        super.setRotation(PoseKt.getRotation(pose));
 
         areMatricesInitialized = true;
     }
 
     @Override
-    public void setPosition(Vector3 position) {
+    public void setPosition(Float3 position) {
     }
 
     @Override
-    public void setRotationQuaternion(Quaternion rotation) {
+    public void setRotation(Float3 rotation) {
     }
 
     // Only used if this camera is not controlled by ARCore.

@@ -49,9 +49,9 @@ public class RotationController extends BaseTransformationController<TwistGestur
   public void onContinueTransformation(TwistGesture gesture) {
     float rotationAmount = -gesture.getDeltaRotationDegrees() * rotationRateDegrees;
     Quaternion rotationDelta = new Quaternion(Vector3.up(), rotationAmount);
-    Quaternion localrotation = getTransformableNode().getRotationQuaternion();
-    localrotation = Quaternion.multiply(localrotation, rotationDelta);
-    getTransformableNode().setRotationQuaternion(localrotation);
+//    Quaternion localrotation = getTransformableNode().getOrientation();
+//    localrotation = Quaternion.multiply(localrotation, rotationDelta);
+//    getTransformableNode().setOrientation(localrotation);
   }
 
   @Override

@@ -17,6 +17,7 @@ package com.google.ar.sceneform.ux;
 
 import androidx.annotation.Nullable;
 
+import com.google.android.filament.utils.Float3;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Camera;
 import com.google.ar.core.HitResult;
@@ -31,9 +32,11 @@ import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.utilities.Preconditions;
 
+import io.github.sceneview.FilamentKt;
 import io.github.sceneview.SceneView;
 import io.github.sceneview.ar.ArSceneView;
 import io.github.sceneview.ar.arcore.ArFrame;
+import io.github.sceneview.ar.arcore.PoseKt;
 import io.github.sceneview.ar.node.ArNode;
 import io.github.sceneview.node.Node;
 import io.github.sceneview.node.NodeParent;
@@ -50,9 +53,9 @@ public class TranslationController extends BaseTransformationController<DragGest
     @Nullable
     private HitResult lastArHitResult;
     @Nullable
-    private Vector3 desiredLocalPosition;
+    private Float3 desiredLocalPosition;
     @Nullable
-    private Quaternion desiredLocalRotation;
+    private Float3 desiredLocalRotation;
 
     private final Vector3 initialForwardInLocal = new Vector3();
 
@@ -164,8 +167,8 @@ public class TranslationController extends BaseTransformationController<DragGest
             if (trackable instanceof Plane) {
                 Plane plane = (Plane) trackable;
                 if (plane.isPoseInPolygon(pose) && allowedPlaneTypes.contains(plane.getType())) {
-                    desiredLocalPosition = new Vector3(pose.tx(), pose.ty(), pose.tz());
-                    desiredLocalRotation = new Quaternion(pose.qx(), pose.qy(), pose.qz(), pose.qw());
+                    desiredLocalPosition = PoseKt.getPosition(pose);
+                    desiredLocalRotation = PoseKt.getRotation(pose);
                     Node parent = getTransformableNode().getParentNode();
                     if (parent != null && desiredLocalPosition != null && desiredLocalRotation != null) {
                         Matrix parentNodeTransformMatrix = parent.getTransformationMatrix();
@@ -174,14 +177,12 @@ public class TranslationController extends BaseTransformationController<DragGest
                         Quaternion parentNodeRotation = new Quaternion();
                         parentNodeTransformMatrix.decomposeRotation(parentNodeScale, parentNodeRotation);
 
-                        desiredLocalPosition = parent.getTransformationMatrix().transformPoint(desiredLocalPosition);
-                        desiredLocalRotation =
-                                Quaternion.multiply(parentNodeRotation.inverted(),
-                                        Preconditions.checkNotNull(desiredLocalRotation));
+//                        desiredLocalPosition = parent.getTransformationMatrix().transformPoint(new Vector3(desiredLocalPosition.getX(), desiredLocalPosition.getY(), desiredLocalPosition.getZ());
+//                        desiredLocalRotation =
+//                                Quaternion.multiply(parentNodeRotation.inverted(), desiredLocalRotation);
                     }
 
-                    desiredLocalRotation =
-                            calculateFinalDesiredLocalRotation(Preconditions.checkNotNull(desiredLocalRotation));
+//                    desiredLocalRotation = calculateFinalDesiredLocalRotation(desiredLocalRotation);
                     lastArHitResult = hit;
                     break;
                 }
@@ -232,8 +233,8 @@ public class TranslationController extends BaseTransformationController<DragGest
 //      getTransformableNode().setWorldPosition(worldPosition);
         }
 
-        desiredLocalPosition = Vector3.zero();
-        desiredLocalRotation = calculateFinalDesiredLocalRotation(Quaternion.identity());
+//        desiredLocalPosition = new Float3();
+//        desiredLocalRotation = calculateFinalDesiredLocalRotation(new Float3());
     }
 
     private ArNode getAnchorNodeOrDie() {
@@ -247,42 +248,42 @@ public class TranslationController extends BaseTransformationController<DragGest
 
     private void updatePosition(FrameTime frameTime) {
         // Store in local variable for nullness static analysis.
-        Vector3 desiredLocalPosition = this.desiredLocalPosition;
-        if (desiredLocalPosition == null) {
-            return;
-        }
-
-        Vector3 localPosition = getTransformableNode().getPosition();
-        float lerpFactor = MathHelper.clamp(frameTime.getDeltaSeconds() * LERP_SPEED, 0, 1);
-        localPosition = Vector3.lerp(localPosition, desiredLocalPosition, lerpFactor);
-
-        float lengthDiff = Math.abs(Vector3.subtract(desiredLocalPosition, localPosition).length());
-        if (lengthDiff <= POSITION_LENGTH_THRESHOLD) {
-            localPosition = desiredLocalPosition;
-            this.desiredLocalPosition = null;
-        }
-
-        getTransformableNode().setPosition(localPosition);
+//        Vector3 desiredLocalPosition = this.desiredLocalPosition;
+//        if (desiredLocalPosition == null) {
+//            return;
+//        }
+//
+//        Vector3 localPosition = getTransformableNode().getPosition();
+//        float lerpFactor = MathHelper.clamp(frameTime.getDeltaSeconds() * LERP_SPEED, 0, 1);
+//        localPosition = Vector3.lerp(localPosition, desiredLocalPosition, lerpFactor);
+//
+//        float lengthDiff = Math.abs(Vector3.subtract(desiredLocalPosition, localPosition).length());
+//        if (lengthDiff <= POSITION_LENGTH_THRESHOLD) {
+//            localPosition = desiredLocalPosition;
+//            this.desiredLocalPosition = null;
+//        }
+//
+//        getTransformableNode().setPosition(localPosition);
     }
 
     private void updateRotation(FrameTime frameTime) {
         // Store in local variable for nullness static analysis.
-        Quaternion desiredLocalRotation = this.desiredLocalRotation;
-        if (desiredLocalRotation == null) {
-            return;
-        }
+//        Quaternion desiredLocalRotation = this.desiredLocalRotation;
+//        if (desiredLocalRotation == null) {
+//            return;
+//        }
 
-        Quaternion localRotation = getTransformableNode().getRotationQuaternion();
-        float lerpFactor = MathHelper.clamp(frameTime.getDeltaSeconds() * LERP_SPEED, 0, 1);
-        localRotation = Quaternion.slerp(localRotation, desiredLocalRotation, lerpFactor);
-
-        float dot = Math.abs(dotQuaternion(localRotation, desiredLocalRotation));
-        if (dot >= ROTATION_DOT_THRESHOLD) {
-            localRotation = desiredLocalRotation;
-            this.desiredLocalRotation = null;
-        }
-
-        getTransformableNode().setRotationQuaternion(localRotation);
+//        Float3 localRotation = getTransformableNode().getRotation();
+//        float lerpFactor = MathHelper.clamp(frameTime.getDeltaSeconds() * LERP_SPEED, 0, 1);
+//        localRotation = FilamentKt.lerp(localRotation, desiredLocalRotation, lerpFactor);
+//
+//        float dot = Math.abs(dotQuaternion(localRotation, desiredLocalRotation));
+//        if (dot >= ROTATION_DOT_THRESHOLD) {
+//            localRotation = desiredLocalRotation;
+//            this.desiredLocalRotation = null;
+//        }
+//
+//        getTransformableNode().setOrientation(localRotation);
     }
 
     /**

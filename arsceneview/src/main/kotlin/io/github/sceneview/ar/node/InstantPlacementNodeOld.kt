@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
+import com.google.ar.sceneform.math.Quaternion
+import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.RenderableInstance
 import io.github.sceneview.Position
 import io.github.sceneview.Rotation
 import io.github.sceneview.Scale
-import io.github.sceneview.SceneView
 import io.github.sceneview.ar.ArSceneView
+import io.github.sceneview.SceneView
 import io.github.sceneview.ar.arcore.ArFrame
 import io.github.sceneview.ar.arcore.depthEnabled
 import io.github.sceneview.ar.arcore.isTracking
@@ -27,7 +29,7 @@ import io.github.sceneview.node.NodeParent
  * - [createAnchor] in order to extract a fixed/anchored copy of the actual.
  * This node will continue following the [com.google.ar.core.Camera]
  */
-open class DepthNode(
+open class InstantPlacementNodeOld(
     position: Position = defaultPosition,
     rotation: Rotation = defaultRotation,
     scales: Scale = defaultScales,
@@ -39,8 +41,20 @@ open class DepthNode(
     parent = parent
 ) {
 
+    var lastValidHitResult: HitResult? = null
 
+    var isTracking: Boolean = false
+        internal set(value) {
+            if (field != value) {
+                field = value
+                isVisible = value
+                onTrackingChanged?.invoke(this, value)
+            }
+        }
 
+    var onArFrameHitResult: ((node: InstantPlacementNodeOld, hitResult: HitResult?, isTracking: Boolean) -> Unit)? =
+        null
+    var onTrackingChanged: ((node: InstantPlacementNodeOld, isTracking: Boolean) -> Unit)? = null
 
     init {
         isVisible = false
@@ -55,27 +69,33 @@ open class DepthNode(
         parent: NodeParent? = null,
         position: Position = defaultPosition,
         rotation: Rotation = defaultRotation,
-        scales: Scale = defaultScale
+        scales: Scale = defaultScales,
     ) : this(position, rotation, scales, parent) {
         loadModel(context, modelGlbFileLocation, coroutineScope, onModelLoaded, onError)
     }
 
+    override fun onAttachToScene(sceneView: SceneView) {
+        super.onAttachToScene(sceneView)
 
-    var lastTrackedHitResult: HitResult? = null
+        (sceneView as? ArSceneView)?.configureSession { config ->
+            config.depthEnabled = true
+        }
+    }
 
     override fun onArFrame(frame: ArFrame) {
         super.onArFrame(frame)
 
         if (anchor == null) {
-            onHitResult(hitTest(frame))
+            val hitResult = hitTest(frame)
+            onArFrameHitResult(hitResult, hitResult?.trackable?.isTracking == true)
         }
-        isTracking = pose != null || lastTrackedHitResult?.isTracking == true
+        isTracking = pose != null || lastValidHitResult?.isTracking == true
     }
 
-    open fun onHitResult(hitResult: HitResult?) {
+    open fun onArFrameHitResult(hitResult: HitResult?, isTracking: Boolean) {
         // Keep the last position when no more tracking result
-        if (hitResult?.isTracking == true) {
-            lastTrackedHitResult = hitResult
+        if (hitResult != null && isTracking) {
+            lastValidHitResult = hitResult
             hitResult.hitPose?.let { hitPose ->
                 pose = hitPose
             }

@@ -1,11 +1,36 @@
 package io.github.sceneview.ar.arcore
 
+import com.google.android.filament.utils.Float4
 import com.google.ar.core.Pose
-import com.google.ar.sceneform.math.Quaternion
-import com.google.ar.sceneform.math.Vector3
+import io.github.sceneview.Position
+import io.github.sceneview.Rotation
+import kotlin.math.asin
+import kotlin.math.atan2
 
-val Pose.position get() = Vector3(tx(), ty(), tz())
-val Pose.rotation get() = rotationQuaternion!!.let { Quaternion(it[0], it[1], it[2], it[3]) }
+val Pose.position: Position get() = Position(x = tx(), y = ty(), z = tz())
+val Pose.rotation: Rotation
+    get() = rotationQuaternion!!.let {
+        Float4(
+            x = it[0],
+            y = it[1],
+            z = it[2],
+            w = it[3]
+        ).eulerAngles
+    }
+
+val Float4.eulerAngles: Rotation
+    get() {
+        val xRadians =
+            atan2((2.0f * (y * z + w * x)).toDouble(), (w * w - x * x - y * y + z * z).toDouble())
+        val yRadians = asin((-2.0f * (x * z - w * y)).toDouble())
+        val zRadians =
+            atan2((2.0f * (x * y + w * z)).toDouble(), (w * w + x * x - y * y - z * z).toDouble())
+        return Rotation(
+            Math.toDegrees(xRadians).toFloat(),
+            Math.toDegrees(yRadians).toFloat(),
+            Math.toDegrees(zRadians).toFloat()
+        )
+    }
 
 /**
  * Calculate the normal distance from this to the other, the given other pose should have y axis

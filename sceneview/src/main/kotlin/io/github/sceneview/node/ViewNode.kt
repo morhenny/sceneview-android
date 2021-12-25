@@ -11,6 +11,9 @@ import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
 import com.google.ar.sceneform.utilities.ChangeId
+import io.github.sceneview.Position
+import io.github.sceneview.Rotation
+import io.github.sceneview.Scale
 import io.github.sceneview.model.await
 
 /**
@@ -22,11 +25,11 @@ import io.github.sceneview.model.await
  * another node, or the scene.
  */
 open class ViewNode(
-    position: Vector3 = defaultPosition,
-    rotationQuaternion: Quaternion = defaultRotation,
-    scales: Vector3 = defaultScales,
+    position: Position = defaultPosition,
+    rotation: Rotation = defaultRotation,
+    scales: Scale = defaultScales,
     parent: NodeParent? = null
-) : Node(position, rotationQuaternion, scales, parent) {
+) : Node(position, rotation, scales, parent) {
 
     // Rendering fields.
     private var renderableId: Int = ChangeId.EMPTY_ID
@@ -67,10 +70,10 @@ open class ViewNode(
     constructor(
         renderableInstance: RenderableInstance,
         parent: NodeParent? = null,
-        position: Vector3 = defaultPosition,
-        rotationQuaternion: Quaternion = defaultRotation,
-        scales: Vector3 = defaultScales
-    ) : this(position, rotationQuaternion, scales) {
+        position: Position = defaultPosition,
+        rotation: Rotation = defaultRotation,
+        scales: Scale = defaultScales
+    ) : this(position, rotation, scales) {
         this.renderableInstance = renderableInstance
     }
 
@@ -81,16 +84,16 @@ open class ViewNode(
         onViewLoaded: ((instance: RenderableInstance, view: View) -> Unit)? = null,
         onError: ((error: Exception) -> Unit)? = null,
         parent: NodeParent? = null,
-        position: Vector3 = defaultPosition,
-        rotationQuaternion: Quaternion = defaultRotation,
-        scales: Vector3 = defaultScales
-    ) : this(position, rotationQuaternion, scales, parent) {
+        position: Position = defaultPosition,
+        rotation: Rotation = defaultRotation,
+        scales: Scale = defaultScales
+    ) : this(position, rotation, scales, parent) {
         loadView(context, viewLayoutResId, coroutineScope, onViewLoaded, onError)
     }
 
     constructor(node: ViewNode) : this(
         position = node.position,
-        rotationQuaternion = node.rotationQuaternion,
+        rotation = node.rotation,
         scales = node.scales
     ) {
         setRenderable(node.renderable)
