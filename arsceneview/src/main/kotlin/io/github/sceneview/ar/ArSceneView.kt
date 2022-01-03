@@ -203,20 +203,6 @@ open class ArSceneView @JvmOverloads constructor(
         session.depthEnabled = depthEnabled
         session.instantPlacementEnabled = instantPlacementEnabled
 
-        // Don't remove this code-block. It is important to correctly
-        // set the DisplayGeometry for the ArCore-Session if for
-        // example the permission Dialog is shown on the screen.
-        // If we remove this part, the camera is flickering if returned
-        // from the permission Dialog.
-        //TODO : Remove cause handle by session onSurfaceChanged ?
-        if (renderer.desiredWidth != 0 && renderer.desiredHeight != 0) {
-            session.setDisplayGeometry(
-                display!!.rotation,
-                renderer.desiredWidth,
-                renderer.desiredHeight
-            )
-        }
-
         // Feature config, therefore facing direction, can only be configured once per session.
         if (session.cameraConfig.facingDirection == FacingDirection.FRONT) {
             renderer.isFrontFaceWindingInverted = true
@@ -224,6 +210,21 @@ open class ArSceneView @JvmOverloads constructor(
 
         // Set max frames per seconds here.
         maxFramesPerSeconds = session.cameraConfig.fpsRange.upper
+    }
+
+    override fun onArSessionResumed(session: ArSession) {
+        super.onArSessionResumed(session)
+
+        // Don't remove this code-block. It is important to correctly set the DisplayGeometry for
+        // the ArCore-Session if for example the permission Dialog is shown on the screen.
+        // If we remove this part, the camera is flickering if returned from the permission Dialog.
+        if (renderer.desiredWidth != 0 && renderer.desiredHeight != 0) {
+            session.setDisplayGeometry(
+                display!!.rotation,
+                renderer.desiredWidth,
+                renderer.desiredHeight
+            )
+        }
     }
 
     override fun onArSessionConfigChanged(session: ArSession, config: Config) {
