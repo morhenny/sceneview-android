@@ -40,6 +40,9 @@ open class ArNode() : ModelNode(), ArSceneLifecycleObserver {
     var anchorUpdateInterval = 2.0f
     var lastAnchorUpdateFrame: ArFrame? = null
 
+    private val listOfResolvingAnchors = ArrayList<Anchor>()
+    private var isResolvingMultiple: Boolean = false
+
     /**
      * TODO : Doc
      */
@@ -145,16 +148,47 @@ open class ArNode() : ModelNode(), ArSceneLifecycleObserver {
         }
 
         if (cloudAnchorTaskInProgress) {
-            // Call the listener when the task completes successfully or with an error
-            if (cloudAnchorState != CloudAnchorState.NONE &&
-                cloudAnchorState != CloudAnchorState.TASK_IN_PROGRESS
-            ) {
-                cloudAnchorTaskInProgress = false
-                onCloudAnchorTaskCompleted?.invoke(
-                    anchor,
-                    cloudAnchorState == CloudAnchorState.SUCCESS
-                )
-                onCloudAnchorTaskCompleted = null
+            if (!isResolvingMultiple) {
+                //Call the listener when the task completes successfully or with an error
+                if (cloudAnchorState != CloudAnchorState.NONE && cloudAnchorState != CloudAnchorState.TASK_IN_PROGRESS) {
+                    cloudAnchorTaskInProgress = false
+                    onCloudAnchorTaskCompleted?.invoke(
+                        anchor,
+                        cloudAnchorState == CloudAnchorState.SUCCESS
+                    )
+                    onCloudAnchorTaskCompleted = null
+                }
+            } else { // if currently resolving multiple
+                var successfullyResolvedAnchor = false
+                val anchorsWithError = HashSet<Anchor>()
+                listOfResolvingAnchors.forEach loop@{
+                    if (it.cloudAnchorState != CloudAnchorState.NONE && it.cloudAnchorState != CloudAnchorState.TASK_IN_PROGRESS) {
+                        if (it.cloudAnchorState != CloudAnchorState.SUCCESS) {
+                            anchorsWithError.add(it)
+                        } else {
+                            this@ArNode.anchor = it
+                            successfullyResolvedAnchor = true
+                            return@loop
+                        }
+                    }
+                }
+                listOfResolvingAnchors.removeAll(anchorsWithError)
+                if (successfullyResolvedAnchor) {
+                    cloudAnchorTaskInProgress = false
+                    isResolvingMultiple = false
+                    onCloudAnchorTaskCompleted?.invoke(
+                        this@ArNode.anchor!!, cloudAnchorState == CloudAnchorState.SUCCESS
+                    )
+                    onCloudAnchorTaskCompleted = null
+                    listOfResolvingAnchors.forEach {
+                        it.detach()
+                    }
+                    listOfResolvingAnchors.clear()
+                } else if (listOfResolvingAnchors.isEmpty()) {
+                    cloudAnchorTaskInProgress = false
+                    isResolvingMultiple = false
+                    onCloudAnchorTaskCompleted = null
+                }
             }
         }
     }
@@ -278,7 +312,40 @@ open class ArNode() : ModelNode(), ArSceneLifecycleObserver {
 
         anchor = arSession?.resolveCloudAnchor(cloudAnchorId)
         cloudAnchorTaskInProgress = true
+        isResolvingMultiple = false
         onCloudAnchorTaskCompleted = onTaskCompleted
+    }
+
+    /**
+     * ### Resolves a list of Cloud Anchor IDs and returns the first anchor found
+     *
+     * The [anchor] is replaced with the first successfully resolved anchor returned by [Session.resolveCloudAnchor], the rest will be detached.
+     *
+     * @param cloudAnchorIdList The List of Cloud Anchor IDs to try to resolve
+     * @param onTaskCompleted Called when the task completes successfully or with an error.
+     */
+    fun resolveCloudAnchorFromIdList(
+        cloudAnchorIdList: List<String>,
+        onTaskCompleted: (anchor: Anchor, success: Boolean) -> Unit
+    ) {
+        if (cloudAnchorTaskInProgress) throw IllegalStateException("The task is already in progress")
+        if (cloudAnchorIdList.isEmpty()) {
+            throw IllegalArgumentException("The list of cloud anchor IDs should not be empty")
+        } else if (cloudAnchorIdList.size > 40) {
+            throw IllegalArgumentException("The list of cloud anchor IDs should not be greater than 40")
+        } else if (cloudAnchorIdList.size == 1) {
+            resolveCloudAnchor(cloudAnchorIdList[0], onTaskCompleted)
+        } else {
+            arSession?.let { arSession ->
+                cloudAnchorIdList.forEach {
+                    listOfResolvingAnchors.add(arSession.resolveCloudAnchor(it))
+                }
+                anchor = listOfResolvingAnchors[0]
+                cloudAnchorTaskInProgress = true
+                isResolvingMultiple = true
+                onCloudAnchorTaskCompleted = onTaskCompleted
+            }
+        }
     }
 
     /**
@@ -289,6 +356,11 @@ open class ArNode() : ModelNode(), ArSceneLifecycleObserver {
     fun cancelCloudAnchorResolveTask() {
         if (cloudAnchorTaskInProgress) {
             anchor?.detach()
+            if (isResolvingMultiple) {
+                listOfResolvingAnchors.forEach { it.detach() }
+                listOfResolvingAnchors.clear()
+                isResolvingMultiple = false
+            }
             cloudAnchorTaskInProgress = false
             onCloudAnchorTaskCompleted = null
         }
@@ -325,6 +397,11 @@ open class ArNode() : ModelNode(), ArSceneLifecycleObserver {
 
         cloudAnchorTaskInProgress = false
         onCloudAnchorTaskCompleted = null
+
+        listOfResolvingAnchors.forEach {
+            it.detach()
+        }
+        listOfResolvingAnchors.clear()
 
         super.destroy()
     }
